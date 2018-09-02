@@ -21,6 +21,7 @@ public class ProductList
         {
             if (listOfProducts[i] == null)
             {
+
                 listOfProducts[i] = newProduct;
                 break;
             }
@@ -35,13 +36,39 @@ public class ProductList
         }
     }
 
+    public boolean isProdExists(String newProdName)
+    {
+        boolean exist = false;
+        for (int i = 0; i < listOfProducts.length; i++)
+        {
+            if (listOfProducts[i] != null)
+            {
+                String prodName = listOfProducts[i].getName();
+                if (prodName.equals(newProdName.toLowerCase()))
+                {
+                    System.out.println("This product exists, can not add again.");
+                    exist = true;
+                    break;
+                }
+            }
+        }
+        return exist;
+    }
+
     public void printProductList()
     {
         int numberOfNull = 0;
         for (int i = 0; i < listOfProducts.length; i++)
         {
             if (listOfProducts[i] != null)
-                System.out.println("Product " + i + ": " + listOfProducts[i].getName());
+            {
+                System.out.println("Product no." + (i + 1) + ": " + listOfProducts[i].getName());
+                System.out.println("  Description" + ": " + listOfProducts[i].getDesc());
+                System.out.println("  Quantity" + ": " + listOfProducts[i].getQtyOnHand());
+                System.out.println("  Price" + ": " + listOfProducts[i].getPrice());
+                System.out.println("  Min Order Quantity" + ": " + listOfProducts[i].getMinOrderQty());
+                System.out.println("");
+            }
             else
             {
                 numberOfNull++;
@@ -62,6 +89,4 @@ public class ProductList
     {
         listOfProducts = newListOfProducts;
     }
-
-
 }

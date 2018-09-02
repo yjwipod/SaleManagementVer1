@@ -11,6 +11,28 @@ public class SaleTransaction
         saleCode = 1000;
     }
 
+    public void addProduct(Product newProduct)
+    {
+        int numberOfProducts = 0;
+        for (int i = 0; i < items.length; i++)
+        {
+            if (items[i] == null)
+            {
+
+                items[i] = newProduct;
+                break;
+            }
+            else
+            {
+                numberOfProducts++;
+                if (numberOfProducts == items.length)
+                {
+                    System.out.println("Product list is full. You can not add anymore.");
+                }
+            }
+        }
+    }
+
     public int getSaleCode()
     {
         return saleCode;

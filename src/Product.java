@@ -16,6 +16,15 @@ public class Product
         minOrderQty = 1;
     }
 
+    public Product(String productName, String description, double productPrice, int prodQtyOnHand, int prodMinOrdQty)
+    {
+        name = productName;
+        desc = description;
+        price = productPrice;
+        qtyOnHand = prodQtyOnHand;
+        minOrderQty = prodMinOrdQty;
+    }
+
     public String getName()
     {
         return name;
