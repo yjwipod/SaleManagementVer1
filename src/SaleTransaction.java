@@ -11,6 +11,13 @@ public class SaleTransaction
         saleCode = 1000;
     }
 
+    public SaleTransaction(int newSaleCode)
+    {
+        items = new Product[3];
+        totalCost = 0.0;
+        saleCode = newSaleCode;
+    }
+
     public void addProduct(Product newProduct)
     {
         int numberOfProducts = 0;
@@ -20,6 +27,7 @@ public class SaleTransaction
             {
 
                 items[i] = newProduct;
+                totalCost = totalCost + items[i].getPrice() * items[i].getMinOrderQty();
                 break;
             }
             else
@@ -27,10 +35,17 @@ public class SaleTransaction
                 numberOfProducts++;
                 if (numberOfProducts == items.length)
                 {
-                    System.out.println("Product list is full. You can not add anymore.");
+                    System.out.println("Cart list is full. You can not add anymore.");
                 }
             }
         }
+    }
+
+    public void removeProduct(int index)
+    {
+        double cost = items[index].getPrice() * items[index].getMinOrderQty();
+        totalCost = totalCost - cost;
+        items[index] = null;
     }
 
     public int getSaleCode()

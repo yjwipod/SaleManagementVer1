@@ -9,7 +9,9 @@ public class Sale
     public Sale()
     {
         prodList = new ProductList();
-        transaction = new SaleTransaction();
+        RandomNumberGenerator saleCodeGen = new RandomNumberGenerator(1000,9999);
+        int newSaleCode = saleCodeGen.getRandomNumber();
+        transaction = new SaleTransaction(newSaleCode);
     }
 
     public void mainSystem()
@@ -30,11 +32,12 @@ public class Sale
         {
             case 1: registerProduct();
                     break;
-            case 2: buyProduct();
+            case 2: buyProductToCart();
                     break;
-            case 3: System.out.println("3"); break;
+            case 3: removeProductFromCart();
+                    break;
             case 4: viewAllProducts(); break;
-            case 5: System.out.println("5"); break;
+            case 5: checkOut(); break;
             case 6: System.out.println("6"); break;
             case 7: System.out.println("System will be closed."); break;
             default: System.out.println("Input Error. You need to choose 1 to 7."); break;
@@ -82,7 +85,7 @@ public class Sale
         prodList.addProduct(newProduct);
     }
 
-    public void buyProduct()
+    public void buyProductToCart()
     {
         Scanner console = new Scanner(System.in);
         int prodNumber = 0;
@@ -92,6 +95,57 @@ public class Sale
             selectProductFromList(prodList.getListOfProducts());
             String prodNumberStr = console.nextLine();
             prodNumber = Integer.parseInt(prodNumberStr);
+            while (prodNumber - 1 > 5 )
+            {
+                System.out.print("The number should be less than 7, please enter again: ");
+                prodNumberStr = console.nextLine();
+                prodNumber = Integer.parseInt(prodNumberStr);
+            }
+            if (prodNumber != 6)
+            {
+                if (prodList.getListOfProducts()[prodNumber - 1] != null)
+                {
+                    Product selectedProduct = prodList.getListOfProducts()[prodNumber - 1];
+                    if (selectedProduct.getQtyOnHand() >= selectedProduct.getMinOrderQty())
+                    {
+                        transaction.addProduct(selectedProduct);
+                    }
+                    else
+                    {
+                        System.out.println("This product is out of stock. Can not be added to your cart.");
+                    }
+                }
+                else
+                    System.out.println("Product does not exist, please check the number.");
+            }
+        }
+    }
+
+    public void removeProductFromCart()
+    {
+        Scanner console = new Scanner(System.in);
+        int prodNumber = 0;
+        while (prodNumber != 4)
+        {
+            System.out.println("Please select from the following products which have been added to the cart:");
+            selectProductFromList(transaction.getItems());
+            String prodNumberStr = console.nextLine();
+            prodNumber = Integer.parseInt(prodNumberStr);
+            while (prodNumber - 1 > 3 )
+            {
+                System.out.print("The number should be less than 4, please enter again: ");
+                prodNumberStr = console.nextLine();
+                prodNumber = Integer.parseInt(prodNumberStr);
+            }
+            if (prodNumber != 4)
+            {
+                if (transaction.getItems()[prodNumber - 1] != null)
+                {
+                    transaction.removeProduct(prodNumber - 1);
+                }
+                else
+                    System.out.println("Product does not exist in the cart, please check the number.");
+            }
         }
     }
 
@@ -103,7 +157,7 @@ public class Sale
 
             if (list[i] != null)
             {
-                System.out.println("Select Product: " + (i + 1));
+                System.out.println("Select Product " + (i + 1) + ": ");
                 System.out.println("  Description" + ": " + list[i].getDesc());
                 System.out.println("  Quantity" + ": " + list[i].getQtyOnHand());
                 System.out.println("  Price" + ": " + list[i].getPrice());
@@ -111,9 +165,44 @@ public class Sale
                 System.out.println("");
             }
         }
-        System.out.println("Select 6 to exit menu");
+        System.out.println("Transaction " + transaction.getSaleCode() + ". Current Total cost is " + transaction.getTotalCost());
+        System.out.println("Select " + (list.length + 1) + " to exit menu");
         System.out.print("Please enter selected product: ");
 
+    }
+
+    public void checkOut()
+    {
+        int duplicatedProductNumber = 1;
+        Product[] cartList = transaction.getItems();
+        Product[] productList = prodList.getListOfProducts();
+        for (int i = 0; i < cartList.length; i++)
+        {
+            if (cartList[i] != null)
+            {
+                Product cartProduct = cartList[i];
+                String cartProductName = cartProduct.getName();
+                for (int j = i + 1; j < cartList.length; j++)
+                {
+                    if (cartList[j] != null)
+                    {
+                        String nextProductName = cartList[j].getName();
+                        if (nextProductName.equals(cartProductName))
+                        {
+                            duplicatedProductNumber++;
+                            cartList[i].setMinOrderQty(cartList[i].getMinOrderQty() + cartList[j].getMinOrderQty());
+                            cartList[j] = null;
+                        }
+                    }
+                }
+                if (duplicatedProductNumber * cartProduct.getMinOrderQty() > cartProduct.getQtyOnHand())
+                {
+                    System.out.println("Product " + cartProductName + " can not be finalized because the number of the product is greater than its stock.");
+                    cartList[i] = null;
+                    transaction.setTotalCost(transaction.getTotalCost() - duplicatedProductNumber * cartProduct.getMinOrderQty() * cartProduct.getPrice());
+                }
+            }
+        }
     }
 
     public boolean checkProdNameLength(String name)
